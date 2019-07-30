@@ -25,12 +25,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBAction func clickConvert(_ sender: Any) {
         
         let english  = englishTestField.stringValue
+        if english.isEmpty {
+            let alert = NSAlert()
+            alert.informativeText = "English is empty"
+            alert.runModal()
+            convertButton.isEnabled = false
+            return
+        }
         let englishs =  english.components(separatedBy: "\n")
 //        print(englishs)
         let other   = otherLaunguageTextField.stringValue
+        if other.isEmpty {
+            let alert = NSAlert()
+            alert.informativeText = "Local is empty"
+            alert.runModal()
+            convertButton.isEnabled = false
+            return
+        }
         let others  =  other.components(separatedBy: "\n")
 //        print(others)
         
+        guard others.count == englishs.count else {
+            let alert = NSAlert()
+            alert.informativeText = "lines is defferent!"
+            alert.runModal()
+            convertButton.isEnabled = false
+            return
+        }
         let count = englishs.count
         var results: [String] = []
         for i in 0..<count {
@@ -48,6 +69,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         paste.clearContents()
         paste.writeObjects([result as NSPasteboardWriting])
         
+        otherLaunguageTextField.stringValue = ""
+        
         
         pop.contentViewController =  tipViewController
         pop.animates = true
@@ -56,7 +79,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
     }
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        // Insert code here to initialize your application
+        otherLaunguageTextField.delegate = self
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
@@ -66,3 +89,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 }
 
+
+extension AppDelegate: NSTextFieldDelegate {
+    func controlTextDidChange(_ obj: Notification) {
+        guard convertButton.isEnabled == false else {
+            return
+        }
+        guard let field = obj.object as? NSTextField else {
+            return
+        }
+        guard !field.stringValue.isEmpty else {
+            return
+        }
+        guard englishTestField.stringValue.isEmpty == false else {
+            return
+        }
+        convertButton.isEnabled = true
+    }
+}
